@@ -1,4 +1,4 @@
-.PHONY: examples docker docker-build
+.PHONY: examples resume.pdf cv.pdf coverletter.pdf docker-resume docker-cv docker-coverletter clean
 
 CC = xelatex
 EXAMPLES_DIR = examples
@@ -19,20 +19,17 @@ cv.pdf: $(EXAMPLES_DIR)/cv.tex $(CV_SRCS)
 coverletter.pdf: $(EXAMPLES_DIR)/coverletter.tex
 	$(CC) -output-directory=$(EXAMPLES_DIR) $<
 
-docker-build:
-	docker build -t $(DOCKER_IMAGE) .
+docker-resume:
+	docker run --rm -v $(PWD):/doc $(DOCKER_IMAGE) make resume.pdf
 
-docker-resume: docker-build
-	docker run --rm --user $(shell id -u):$(shell id -g) -i -w "/doc" -v "$(PWD)":/doc $(DOCKER_IMAGE) make resume.pdf
+docker-cv:
+	docker run --rm -v $(PWD):/doc $(DOCKER_IMAGE) make cv.pdf
 
-docker-cv: docker-build
-	docker run --rm --user $(shell id -u):$(shell id -g) -i -w "/doc" -v "$(PWD)":/doc $(DOCKER_IMAGE) make cv.pdf
+docker-coverletter:
+	docker run --rm -v $(PWD):/doc $(DOCKER_IMAGE) make coverletter.pdf
 
-docker-coverletter: docker-build
-	docker run --rm --user $(shell id -u):$(shell id -g) -i -w "/doc" -v "$(PWD)":/doc $(DOCKER_IMAGE) make coverletter.pdf
-
-docker: docker-build
-	docker run --rm --user $(shell id -u):$(shell id -g) -i -w "/doc" -v "$(PWD)":/doc $(DOCKER_IMAGE)
+docker:
+	docker run --rm -v $(PWD):/doc $(DOCKER_IMAGE) make examples
 
 clean:
 	rm -rf $(EXAMPLES_DIR)/*.pdf
